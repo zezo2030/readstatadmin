@@ -50,8 +50,6 @@
     "users": "المستخدمون",
     "properties": "العقارات",
     "requests": "الطلبات",
-    "reports": "البلاغات",
-    "locations": "المواقع",
     "broadcast": "الإشعارات"
   },
   "login": {
@@ -69,6 +67,7 @@
   },
   "stats": {
     "title": "نظرة عامة",
+    "subtitle": "راقب وأدِر المستخدمين والعقارات والطلبات وإشعارات النظام لحظة بلحظة.",
     "users": "المستخدمون",
     "properties": "العقارات",
     "requests": "الطلبات",
@@ -172,58 +171,6 @@
       "buy": "شراء",
       "rent": "إيجار"
     }
-  },
-  "reports": {
-    "title": "البلاغات",
-    "target": "الهدف",
-    "targetType": "نوع الهدف",
-    "targetTypeValue": {
-      "property": "عقار",
-      "user": "مستخدم",
-      "broker": "دلال"
-    },
-    "reason": "السبب",
-    "reporter": "المُبلِّغ",
-    "status": "الحالة",
-    "created": "تاريخ الإنشاء",
-    "filterStatus": "تصفية حسب الحالة",
-    "state": {
-      "open": "مفتوح",
-      "resolved": "تم الحل",
-      "dismissed": "مرفوض"
-    },
-    "resolve": "معالجة",
-    "resolveTitle": "معالجة البلاغ",
-    "outcome": "النتيجة",
-    "outcomeResolved": "حل البلاغ",
-    "outcomeDismissed": "رفض البلاغ",
-    "action": "الإجراء المتخذ",
-    "actionNone": "بدون إجراء",
-    "actionDisabledAccount": "تم تعطيل الحساب",
-    "actionDeletedListing": "تم حذف العقار",
-    "note": "ملاحظة",
-    "notePlaceholder": "ملاحظة داخلية (اختياري)",
-    "resolved": "تمت معالجة البلاغ"
-  },
-  "locations": {
-    "title": "المواقع",
-    "cities": "المدن",
-    "areas": "المناطق",
-    "name": "الاسم",
-    "slug": "المُعرّف",
-    "parent": "المدينة الأم",
-    "status": "الحالة",
-    "addCity": "إضافة مدينة",
-    "addArea": "إضافة منطقة",
-    "editLocation": "تعديل الموقع",
-    "selectCity": "اختر المدينة",
-    "slugHint": "أحرف صغيرة وأرقام وشرطات فقط",
-    "deleteTitle": "حذف الموقع",
-    "deleteConfirm": "سيتم حذف هذا الموقع وكل المناطق التابعة له.",
-    "created": "تمت إضافة الموقع",
-    "updated": "تم تحديث الموقع",
-    "deleted": "تم حذف الموقع",
-    "noAreas": "لا توجد مناطق"
   },
   "broadcast": {
     "title": "إرسال إشعار",

@@ -111,7 +111,7 @@ export function StatsPage() {
               {t('app.title')} {t('stats.title')}
             </h1>
             <p className="text-sm text-primary-foreground/80 md:text-base">
-              Monitor and manage users, properties, requests, and system notifications in real-time.
+              {t('stats.subtitle')}
             </p>
           </div>
         </Card.Content>

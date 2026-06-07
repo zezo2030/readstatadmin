@@ -5,10 +5,8 @@ import {
   Bell,
   Building2,
   ClipboardList,
-  Flag,
   LayoutDashboard,
   LogOut,
-  MapPin,
   Menu,
   Moon,
   Sun,
@@ -33,8 +31,6 @@ const NAV = [
   { to: '/users', icon: Users, key: 'users', end: false },
   { to: '/properties', icon: Building2, key: 'properties', end: false },
   { to: '/requests', icon: ClipboardList, key: 'requests', end: false },
-  { to: '/reports', icon: Flag, key: 'reports', end: false },
-  { to: '/locations', icon: MapPin, key: 'locations', end: false },
   { to: '/broadcast', icon: Bell, key: 'broadcast', end: false },
 ] as const;
 

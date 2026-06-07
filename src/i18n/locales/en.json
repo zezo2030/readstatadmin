@@ -50,8 +50,6 @@
     "users": "Users",
     "properties": "Properties",
     "requests": "Requests",
-    "reports": "Reports",
-    "locations": "Locations",
     "broadcast": "Notifications"
   },
   "login": {
@@ -69,6 +67,7 @@
   },
   "stats": {
     "title": "Overview",
+    "subtitle": "Monitor and manage users, properties, requests, and system notifications in real-time.",
     "users": "Users",
     "properties": "Properties",
     "requests": "Requests",
@@ -172,58 +171,6 @@
       "buy": "Buy",
       "rent": "Rent"
     }
-  },
-  "reports": {
-    "title": "Reports",
-    "target": "Target",
-    "targetType": "Target type",
-    "targetTypeValue": {
-      "property": "Property",
-      "user": "User",
-      "broker": "Broker"
-    },
-    "reason": "Reason",
-    "reporter": "Reporter",
-    "status": "Status",
-    "created": "Created",
-    "filterStatus": "Filter by status",
-    "state": {
-      "open": "Open",
-      "resolved": "Resolved",
-      "dismissed": "Dismissed"
-    },
-    "resolve": "Resolve",
-    "resolveTitle": "Resolve report",
-    "outcome": "Outcome",
-    "outcomeResolved": "Resolve report",
-    "outcomeDismissed": "Dismiss report",
-    "action": "Action taken",
-    "actionNone": "No action",
-    "actionDisabledAccount": "Disabled account",
-    "actionDeletedListing": "Deleted listing",
-    "note": "Note",
-    "notePlaceholder": "Internal note (optional)",
-    "resolved": "Report resolved"
-  },
-  "locations": {
-    "title": "Locations",
-    "cities": "Cities",
-    "areas": "Areas",
-    "name": "Name",
-    "slug": "Slug",
-    "parent": "Parent city",
-    "status": "Status",
-    "addCity": "Add city",
-    "addArea": "Add area",
-    "editLocation": "Edit location",
-    "selectCity": "Select a city",
-    "slugHint": "Lowercase letters, numbers and dashes only",
-    "deleteTitle": "Delete location",
-    "deleteConfirm": "This location and all of its child areas will be deleted.",
-    "created": "Location added",
-    "updated": "Location updated",
-    "deleted": "Location deleted",
-    "noAreas": "No areas"
   },
   "broadcast": {
     "title": "Send notification",
