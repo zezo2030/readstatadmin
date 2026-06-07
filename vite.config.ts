@@ -50,11 +50,9 @@ export default defineConfig(({ mode }) => {
     configuredApiBaseUrl.startsWith('http://') ||
     configuredApiBaseUrl.startsWith('https://');
 
-  // In dev, route browser calls through the Vite proxy so a remote API works
-  // without CORS. Production builds with a relative /api/v1 rely on vercel.json
-  // (or another reverse proxy) to forward /api to the backend.
-  const devApiBaseUrl =
-    mode === 'development' && isRemoteApi ? '/api/v1' : configuredApiBaseUrl;
+  // Always ship a relative base URL to the browser when the env points at a
+  // remote host — dev (Vite proxy) and Vercel (vercel.json) forward /api.
+  const clientApiBaseUrl = isRemoteApi ? '/api/v1' : configuredApiBaseUrl;
 
   return {
     plugins: [react(), tailwindcss()],
@@ -64,7 +62,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(devApiBaseUrl),
+      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(clientApiBaseUrl),
     },
     server: {
       port: 5173,
