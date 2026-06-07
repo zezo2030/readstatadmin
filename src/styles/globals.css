@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200..700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+@import "@heroui/styles";
+
+@theme {
+  --font-sans: 'Readex Pro', 'Manrope', 'system-ui', 'sans-serif';
+  --font-num: 'Manrope', 'Readex Pro', 'system-ui', 'sans-serif';
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+}
+
+/*
+ * Brand palette ported from `desin app/3qarat/tokens.css`
+ * (Material-3, indigo seed #3F3BD6) into shadcn HSL channel tokens.
+ */
+@layer base {
+  :root {
+    --background: 264 100% 99%;
+    --foreground: 240 8% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 8% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 8% 11%;
+
+    --primary: 242 65% 54%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 252 27% 95%;
+    --secondary-foreground: 240 8% 11%;
+
+    --muted: 252 22% 93%;
+    --muted-foreground: 240 5% 35%;
+
+    --accent: 244 100% 94%;
+    --accent-foreground: 246 100% 20%;
+
+    --destructive: 0 75% 42%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 154 40% 30%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 37 100% 26%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 250 9% 80%;
+    --input: 250 9% 80%;
+    --ring: 242 65% 54%;
+
+    --radius: 0.75rem;
+
+    /* role badges (light) */
+    --role-user-bg: 244 100% 94%;
+    --role-user-fg: 245 57% 39%;
+    --role-broker-bg: 241 67% 58%;
+    --role-broker-fg: 0 0% 100%;
+    --role-agency-bg: 241 59% 25%;
+    --role-agency-fg: 245 100% 93%;
+    --role-admin-bg: 246 100% 20%;
+    --role-admin-fg: 244 100% 94%;
+  }
+
+  .dark {
+    --background: 252 16% 8%;
+    --foreground: 252 17% 90%;
+
+    --card: 240 8% 11%;
+    --card-foreground: 252 17% 90%;
+
+    --popover: 240 8% 11%;
+    --popover-foreground: 252 17% 90%;
+
+    --primary: 242 100% 88%;
+    --primary-foreground: 246 84% 30%;
+
+    --secondary: 243 26% 33%;
+    --secondary-foreground: 245 60% 93%;
+
+    --muted: 252 7% 17%;
+    --muted-foreground: 250 9% 80%;
+
+    --accent: 242 64% 46%;
+    --accent-foreground: 244 100% 94%;
+
+    --destructive: 4 100% 29%;
+    --destructive-foreground: 6 100% 92%;
+
+    --success: 150 62% 20%;
+    --success-foreground: 146 64% 83%;
+
+    --warning: 37 100% 20%;
+    --warning-foreground: 36 100% 85%;
+
+    --border: 240 5% 29%;
+    --input: 240 5% 29%;
+    --ring: 242 100% 88%;
+
+    /* role badges (dark) */
+    --role-user-bg: 243 43% 29%;
+    --role-user-fg: 245 100% 89%;
+    --role-broker-bg: 241 67% 58%;
+    --role-broker-fg: 0 0% 100%;
+    --role-agency-bg: 242 100% 88%;
+    --role-agency-fg: 246 84% 23%;
+    --role-admin-bg: 242 64% 46%;
+    --role-admin-fg: 244 100% 94%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Readex Pro', 'Manrope', system-ui, sans-serif;
+  }
+  /* Tabular numerals read better in Manrope for stats/tables */
+  .font-num,
+  td,
+  th {
+    font-feature-settings: 'tnum' 1;
+  }
+}
