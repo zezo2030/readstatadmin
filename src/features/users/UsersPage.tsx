@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Search } from 'lucide-react';
+import { Lock, Search } from 'lucide-react';
 import { listUsers, setUserStatus, approveBroker, type UsersQuery } from '@/api/endpoints';
 import { AppFailure } from '@/api/errorMapper';
 import type { Role, UserAdminView } from '@/api/types';
@@ -112,6 +112,12 @@ export function UsersPage() {
       cell: (u) => (
         <div className="flex flex-col gap-1">
           <RoleBadge role={u.role} />
+          {u.isOwner && (
+            <Badge variant="default" className="gap-1 text-[10px] py-0">
+              <Lock className="size-3" />
+              {t('users.owner')}
+            </Badge>
+          )}
           {u.role === 'Broker' && (
             <Badge variant={u.isApproved ? 'outline' : 'secondary'} className="text-[10px] py-0">
               {u.isApproved ? t('users.approved') : t('users.pendingApproval')}

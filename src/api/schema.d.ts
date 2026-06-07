@@ -2340,6 +2340,389 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/banners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Active home-screen slider banners, ordered by sortOrder */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Active banners */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: components["schemas"]["Banner"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/banners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all banners (admin) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description All banners */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: components["schemas"]["Banner"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create a banner */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["BannerCreate"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Banner"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/banners/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Bulk-update banner sort order */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        items: {
+                            id: string;
+                            sortOrder: number;
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Reordered */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: components["schemas"]["Banner"][];
+                        };
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/admin/banners/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdParam"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a banner */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["IdParam"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Update a banner */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["IdParam"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["BannerUpdate"];
+                };
+            };
+            responses: {
+                /** @description Updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Banner"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/settings/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Public app settings (e.g. slider toggle, media limits) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Settings */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AppSettings"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read app settings (admin) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Settings */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AppSettings"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update app settings (admin) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AppSettingsUpdate"];
+                };
+            };
+            responses: {
+                /** @description Updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AppSettings"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/admin/blocked-identities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List blocked emails/phones (from account deletion) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Blocked identities */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: components["schemas"]["BlockedIdentity"][];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/blocked-identities/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdParam"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Lift a block, allowing re-registration with that email/phone */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: components["parameters"]["IdParam"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Unblocked */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2422,10 +2805,14 @@ export interface components {
             role: components["schemas"]["Role"] | null;
             isActive: boolean;
             isVerified: boolean;
+            /** @description true for the single locked owner / super-admin account */
+            isOwner?: boolean;
+            /** @description Broker approval state (false for non-brokers) */
+            isApproved?: boolean;
+            /** @description Broker office name when role=Broker */
+            officeName?: string | null;
             /** Format: date-time */
             createdAt: string;
-            isApproved?: boolean;
-            officeName?: string | null;
         };
         UserAdminView: components["schemas"]["UserSelf"] & {
             propertyCount?: number;
@@ -2709,6 +3096,71 @@ export interface components {
                 resolved?: number;
                 dismissed?: number;
             };
+        };
+        /** @enum {string} */
+        BannerLinkType: "property" | "url" | "none";
+        Banner: {
+            id: string;
+            /**
+             * Format: uri
+             * @description Signed read URL for the banner image
+             */
+            imageUrl: string;
+            title?: string | null;
+            linkType: components["schemas"]["BannerLinkType"];
+            /** @description Set when linkType=property */
+            propertyId?: string | null;
+            /** @description Set when linkType=url */
+            url?: string | null;
+            sortOrder: number;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        BannerCreate: {
+            /** @description Object-store key from /media/uploads */
+            imageObjectKey: string;
+            title?: string;
+            linkType: components["schemas"]["BannerLinkType"];
+            /** @description Required when linkType=property */
+            propertyId?: string;
+            /**
+             * Format: uri
+             * @description Required when linkType=url
+             */
+            url?: string;
+            sortOrder?: number;
+            isActive?: boolean;
+        };
+        BannerUpdate: {
+            imageObjectKey?: string;
+            title?: string | null;
+            linkType?: components["schemas"]["BannerLinkType"];
+            propertyId?: string | null;
+            url?: string | null;
+            sortOrder?: number;
+            isActive?: boolean;
+        };
+        AppSettings: {
+            sliderEnabled: boolean;
+            maxListingImages: number;
+            maxListingVideos: number;
+        };
+        AppSettingsUpdate: {
+            sliderEnabled?: boolean;
+            maxListingImages?: number;
+            maxListingVideos?: number;
+        };
+        BlockedIdentity: {
+            id: string;
+            email?: string | null;
+            phone?: string | null;
+            reason?: string | null;
+            createdBy?: string | null;
+            /** Format: date-time */
+            createdAt: string;
         };
     };
     responses: {

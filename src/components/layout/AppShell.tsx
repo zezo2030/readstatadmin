@@ -5,10 +5,12 @@ import {
   Bell,
   Building2,
   ClipboardList,
+  GalleryHorizontalEnd,
   LayoutDashboard,
   LogOut,
   Menu,
   Moon,
+  Settings,
   Sun,
   Users,
 } from 'lucide-react';
@@ -32,6 +34,8 @@ const NAV = [
   { to: '/properties', icon: Building2, key: 'properties', end: false },
   { to: '/requests', icon: ClipboardList, key: 'requests', end: false },
   { to: '/broadcast', icon: Bell, key: 'broadcast', end: false },
+  { to: '/banners', icon: GalleryHorizontalEnd, key: 'banners', end: false },
+  { to: '/settings', icon: Settings, key: 'settings', end: false },
 ] as const;
 
 export function AppShell() {

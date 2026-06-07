@@ -11,6 +11,13 @@ export type PropertyRequest = Schemas['PropertyRequest'];
 export type Report = Schemas['Report'];
 export type Location = Schemas['Location'];
 export type Stats = Schemas['Stats'];
+export type Banner = Schemas['Banner'];
+export type BannerCreate = Schemas['BannerCreate'];
+export type BannerUpdate = Schemas['BannerUpdate'];
+export type BannerLinkType = Schemas['BannerLinkType'];
+export type AppSettings = Schemas['AppSettings'];
+export type AppSettingsUpdate = Schemas['AppSettingsUpdate'];
+export type BlockedIdentity = Schemas['BlockedIdentity'];
 
 export type PageInfo = {
   page: number;

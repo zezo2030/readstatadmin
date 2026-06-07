@@ -7,6 +7,8 @@ import { UsersPage } from '@/features/users/UsersPage';
 import { PropertiesPage } from '@/features/properties/PropertiesPage';
 import { RequestsPage } from '@/features/requests/RequestsPage';
 import { BroadcastPage } from '@/features/broadcast/BroadcastPage';
+import { BannersPage } from '@/features/banners/BannersPage';
+import { SettingsPage } from '@/features/settings/SettingsPage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -21,6 +23,8 @@ export const router = createBrowserRouter([
           { path: '/properties', element: <PropertiesPage /> },
           { path: '/requests', element: <RequestsPage /> },
           { path: '/broadcast', element: <BroadcastPage /> },
+          { path: '/banners', element: <BannersPage /> },
+          { path: '/settings', element: <SettingsPage /> },
         ],
       },
     ],

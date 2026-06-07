@@ -50,7 +50,9 @@
     "users": "Users",
     "properties": "Properties",
     "requests": "Requests",
-    "broadcast": "Notifications"
+    "broadcast": "Notifications",
+    "banners": "Banners",
+    "settings": "Settings"
   },
   "login": {
     "title": "Sign in",
@@ -107,7 +109,8 @@
     "approved": "Approved",
     "pendingApproval": "Pending Approval",
     "approveBroker": "Approve Broker",
-    "brokerApproved": "Broker approved successfully"
+    "brokerApproved": "Broker approved successfully",
+    "owner": "Owner"
   },
   "properties": {
     "title": "Properties",
@@ -184,5 +187,59 @@
     "send": "Send",
     "sending": "Sending…",
     "queued": "Notification queued for delivery"
+  },
+  "banners": {
+    "title": "Banners",
+    "subtitle": "Manage the home-screen slider (unlimited banners)",
+    "create": "New banner",
+    "edit": "Edit banner",
+    "saved": "Banner saved",
+    "deleted": "Banner deleted",
+    "image": "Image",
+    "noImage": "No image yet",
+    "uploadImage": "Upload image",
+    "uploading": "Uploading…",
+    "bannerTitle": "Title",
+    "titlePlaceholder": "Optional internal title",
+    "linkType": "Link target",
+    "link": {
+      "property": "In-app property",
+      "url": "External URL",
+      "none": "No link"
+    },
+    "property": "Property",
+    "propertySearchPlaceholder": "Search by property name or pick from the list…",
+    "propertyLoading": "Loading properties…",
+    "propertyNoResults": "No matching properties",
+    "url": "URL",
+    "sortOrder": "Order",
+    "status": "Status",
+    "active": "Active",
+    "created": "Created",
+    "deleteTitle": "Delete banner",
+    "deleteConfirm": "This banner will be removed from the app slider."
+  },
+  "settings": {
+    "title": "System settings",
+    "subtitle": "Control app-wide options and the home slider",
+    "general": "General",
+    "generalHint": "These settings apply to the mobile app in real time.",
+    "sliderEnabled": "Home slider",
+    "sliderEnabledHint": "Show the promotional banner slider on the app home screen.",
+    "maxImages": "Max images per listing",
+    "maxVideos": "Max videos per listing",
+    "saved": "Settings saved"
+  },
+  "blocked": {
+    "title": "Blocked identities",
+    "subtitle": "Emails/phones blocked from re-registration after account deletion",
+    "email": "Email",
+    "phone": "Phone",
+    "reason": "Reason",
+    "created": "Blocked at",
+    "unblock": "Unblock",
+    "unblocked": "Identity unblocked",
+    "unblockTitle": "Lift block",
+    "unblockConfirm": "This email/phone will be allowed to register again."
   }
 }
