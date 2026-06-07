@@ -25,9 +25,13 @@ cp .env.example .env        # then edit VITE_API_BASE_URL if needed
 npm run dev                 # http://localhost:5173
 ```
 
-By default `VITE_API_BASE_URL=/api/v1` and the Vite dev server proxies `/api`
-to `http://localhost:3000` (see `vite.config.ts`). To point at a remote API set
-`VITE_API_BASE_URL` to its full base URL (e.g. `https://api2.senam.tech/api/v1`).
+By default `VITE_API_BASE_URL=/api/v1`. In dev, Vite proxies `/api` to
+`VITE_DEV_PROXY_TARGET` (default local backend; set to `https://api2.senam.tech`
+for the production API). On Vercel, `vercel.json` rewrites `/api` to the same
+host — no browser CORS issues.
+
+If you bake an absolute `VITE_API_BASE_URL` into a production build, the backend
+must allow your admin origin via `CORS_ORIGINS` (see `backend/.env.example`).
 
 Only accounts with the `Admin` role can sign in; other roles are rejected with
 an "admins only" message and never persisted.

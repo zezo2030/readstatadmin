@@ -51,7 +51,8 @@ export default defineConfig(({ mode }) => {
     configuredApiBaseUrl.startsWith('https://');
 
   // In dev, route browser calls through the Vite proxy so a remote API works
-  // without CORS. Production builds keep the configured absolute base URL.
+  // without CORS. Production builds with a relative /api/v1 rely on vercel.json
+  // (or another reverse proxy) to forward /api to the backend.
   const devApiBaseUrl =
     mode === 'development' && isRemoteApi ? '/api/v1' : configuredApiBaseUrl;
 
