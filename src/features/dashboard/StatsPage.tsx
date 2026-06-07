@@ -31,7 +31,7 @@ const REQ_STATUSES = ['open', 'in_progress', 'closed'] as const;
 
 export function StatsPage() {
   const { t } = useTranslation();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['stats'],
     queryFn: getStats,
   });
@@ -86,6 +86,23 @@ export function StatsPage() {
 
   return (
     <div className="space-y-6">
+      {isError ? (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <Card.Content className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <p className="text-sm text-destructive">
+              {error instanceof Error ? error.message : t('errors.unknown')}
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="text-sm font-medium text-destructive underline-offset-4 hover:underline"
+            >
+              {t('common.retry')}
+            </button>
+          </Card.Content>
+        </Card>
+      ) : null}
+
       {/* Welcome Banner */}
       <Card className="border-none bg-primary text-primary-foreground shadow-lg">
         <Card.Content className="p-6 md:p-8">
