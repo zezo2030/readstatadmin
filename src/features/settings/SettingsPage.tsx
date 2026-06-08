@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import {
+  changeOwnerPassword,
   getSettings,
   listBlockedIdentities,
   unblockIdentity,
   updateSettings,
 } from '@/api/endpoints';
+import { useAuth } from '@/auth/authStore';
 import { AppFailure } from '@/api/errorMapper';
 import type { AppSettings, BlockedIdentity } from '@/api/types';
 import { PageHeader } from '@/components/PageHeader';
@@ -71,6 +77,8 @@ export function SettingsPage() {
         title={t('settings.title')}
         description={t('settings.subtitle')}
       />
+
+      <OwnerPasswordSection />
 
       <Card>
         <CardHeader>
@@ -148,6 +156,107 @@ export function SettingsPage() {
 
       <BlockedIdentitiesSection />
     </div>
+  );
+}
+
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(8),
+    confirmPassword: z.string().min(1),
+  })
+  .refine((v) => v.newPassword === v.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'mismatch',
+  });
+
+type PasswordFormValues = z.infer<typeof passwordSchema>;
+
+function OwnerPasswordSection() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const isOwner = useAuth((s) => s.user?.isOwner === true);
+  const logout = useAuth((s) => s.logout);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<PasswordFormValues>({ resolver: zodResolver(passwordSchema) });
+
+  const mutation = useMutation({
+    mutationFn: (values: PasswordFormValues) =>
+      changeOwnerPassword({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      }),
+    onSuccess: async () => {
+      toast.success(t('settings.passwordChanged'));
+      reset();
+      await logout();
+      navigate('/login', { replace: true });
+    },
+    onError: (err) =>
+      toast.error(err instanceof AppFailure ? err.message : t('common.error')),
+  });
+
+  if (!isOwner) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t('settings.ownerPassword')}</CardTitle>
+        <CardDescription>{t('settings.ownerPasswordHint')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={handleSubmit((values) => mutation.mutate(values))}
+          className="max-w-md space-y-4"
+          noValidate
+        >
+          <div className="space-y-1.5">
+            <Label htmlFor="current-password">{t('settings.currentPassword')}</Label>
+            <Input
+              id="current-password"
+              type="password"
+              dir="ltr"
+              autoComplete="current-password"
+              {...register('currentPassword')}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-password">{t('settings.newPassword')}</Label>
+            <Input
+              id="new-password"
+              type="password"
+              dir="ltr"
+              autoComplete="new-password"
+              {...register('newPassword')}
+            />
+            {errors.newPassword ? (
+              <p className="text-xs text-destructive">{t('settings.passwordTooShort')}</p>
+            ) : null}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="confirm-password">{t('settings.confirmPassword')}</Label>
+            <Input
+              id="confirm-password"
+              type="password"
+              dir="ltr"
+              autoComplete="new-password"
+              {...register('confirmPassword')}
+            />
+            {errors.confirmPassword ? (
+              <p className="text-xs text-destructive">{t('settings.passwordMismatch')}</p>
+            ) : null}
+          </div>
+          <Button type="submit" disabled={isSubmitting || mutation.isPending}>
+            {t('common.save')}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 

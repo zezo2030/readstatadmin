@@ -146,3 +146,9 @@ export const listBlockedIdentities = () =>
 
 export const unblockIdentity = (id: string) =>
   request<void>('delete', `/admin/blocked-identities/${id}`);
+
+// ---- owner password (super-admin only) ----
+export const changeOwnerPassword = (body: {
+  currentPassword: string;
+  newPassword: string;
+}) => request<void>('post', '/auth/me/change-password', { data: body });

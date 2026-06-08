@@ -228,7 +228,15 @@
     "sliderEnabledHint": "Show the promotional banner slider on the app home screen.",
     "maxImages": "Max images per listing",
     "maxVideos": "Max videos per listing",
-    "saved": "Settings saved"
+    "saved": "Settings saved",
+    "ownerPassword": "Dashboard password",
+    "ownerPasswordHint": "Change the password you use to sign in to this admin dashboard. Only your owner account can do this.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordChanged": "Password updated. Sign in again with your new password.",
+    "passwordMismatch": "New passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters"
   },
   "blocked": {
     "title": "Blocked identities",
