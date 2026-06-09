@@ -118,13 +118,28 @@
     "type": "النوع",
     "listingType": "نوع العرض",
     "price": "السعر",
+    "currency": "العملة",
     "city": "المدينة",
     "area": "المنطقة",
+    "address": "العنوان التفصيلي",
+    "description": "الوصف",
+    "rooms": "الغرف",
+    "bathrooms": "الحمامات",
+    "size": "المساحة",
+    "floor": "الطابق",
     "owner": "المالك",
     "status": "حالة المراجعة",
     "created": "تاريخ الإنشاء",
     "views": "المشاهدات",
     "filterStatus": "تصفية حسب الحالة",
+    "searchPlaceholder": "ابحث بعنوان العقار أو المالك أو الهاتف أو التاريخ",
+    "availability": "حالة التوفر",
+    "availabilityState": {
+      "available": "متاح",
+      "reserved": "محجوز",
+      "sold": "مباع",
+      "rented": "مؤجر"
+    },
     "moderation": {
       "active": "منشور",
       "pending_review": "بانتظار المراجعة",
@@ -151,7 +166,10 @@
     "rejectReasonPlaceholder": "اكتب سبب الرفض (إلزامي)",
     "rejectReasonRequired": "سبب الرفض إلزامي",
     "details": "تفاصيل العقار",
-    "moderated": "تم تحديث حالة العقار"
+    "moderated": "تم تحديث حالة العقار",
+    "deleted": "تم حذف العقار",
+    "deleteTitle": "حذف العقار",
+    "deleteConfirm": "سيتم إخفاء هذا العقار من التطبيق ولوحة الإدارة."
   },
   "requests": {
     "title": "طلبات العقارات",
@@ -161,10 +179,22 @@
     "requestType": "نوع الطلب",
     "city": "المدينة",
     "budget": "الميزانية",
+    "description": "الوصف",
+    "minPrice": "أقل سعر",
+    "maxPrice": "أعلى سعر",
+    "requiredRooms": "عدد الغرف المطلوب",
+    "contactMethod": "طريقة التواصل",
     "status": "الحالة",
     "urgent": "عاجل",
     "created": "تاريخ الإنشاء",
     "filterStatus": "تصفية حسب الحالة",
+    "searchPlaceholder": "ابحث بعنوان الطلب أو صاحبه أو الهاتف أو التاريخ",
+    "statusUpdated": "تم تحديث حالة الطلب",
+    "saved": "تم حفظ الطلب",
+    "editTitle": "تعديل الطلب",
+    "deleted": "تم حذف الطلب",
+    "deleteTitle": "حذف الطلب",
+    "deleteConfirm": "سيتم إخفاء هذا الطلب من التطبيق ولوحة الإدارة.",
     "state": {
       "open": "مفتوح",
       "in_progress": "قيد التنفيذ",
@@ -173,6 +203,11 @@
     "kind": {
       "buy": "شراء",
       "rent": "إيجار"
+    },
+    "contact": {
+      "call": "اتصال",
+      "whatsapp": "واتساب",
+      "in_app": "داخل التطبيق"
     }
   },
   "broadcast": {

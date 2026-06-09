@@ -6,11 +6,14 @@ import type {
   BannerCreate,
   BannerUpdate,
   BlockedIdentity,
+  AvailabilityStatus,
   BroadcastAudience,
   ModerationStatus,
   OffsetPage,
   Property,
+  PropertyUpdate,
   PropertyRequest,
+  PropertyRequestUpdate,
   RequestStatus,
   Role,
   Stats,
@@ -69,17 +72,46 @@ export const moderateProperty = (
     data: body,
   });
 
+export const updateProperty = (id: string, body: PropertyUpdate) =>
+  request<Property>('patch', `/admin/properties/${id}`, { data: body });
+
+export const updatePropertyStatus = (
+  id: string,
+  body: {
+    moderationStatus?: ModerationStatus;
+    availabilityStatus?: AvailabilityStatus;
+    reason?: string;
+  },
+) => request<Property>('patch', `/admin/properties/${id}/status`, { data: body });
+
+export const deleteProperty = (id: string) =>
+  request<void>('delete', `/admin/properties/${id}`);
+
 // ---- property requests ----
 export type RequestsQuery = {
   page?: number;
   pageSize?: number;
   status?: RequestStatus;
+  search?: string;
 };
 export const listRequests = (params: RequestsQuery) =>
   request<OffsetPage<PropertyRequest>>(
     'get',
     `/admin/property-requests${qs(params)}`,
   );
+
+export const updateRequestStatus = (id: string, status: RequestStatus) =>
+  request<PropertyRequest>('patch', `/admin/property-requests/${id}/status`, {
+    data: { status },
+  });
+
+export const updateRequest = (id: string, body: PropertyRequestUpdate) =>
+  request<PropertyRequest>('patch', `/admin/property-requests/${id}`, {
+    data: body,
+  });
+
+export const deleteRequest = (id: string) =>
+  request<void>('delete', `/admin/property-requests/${id}`);
 
 // ---- broadcast ----
 export const sendBroadcast = (body: {

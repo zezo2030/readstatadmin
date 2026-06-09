@@ -118,13 +118,28 @@
     "type": "Type",
     "listingType": "Listing",
     "price": "Price",
+    "currency": "Currency",
     "city": "City",
     "area": "Area",
+    "address": "Address",
+    "description": "Description",
+    "rooms": "Rooms",
+    "bathrooms": "Bathrooms",
+    "size": "Size",
+    "floor": "Floor",
     "owner": "Owner",
     "status": "Moderation",
     "created": "Created",
     "views": "Views",
     "filterStatus": "Filter by status",
+    "searchPlaceholder": "Search by property title, owner, phone, or date",
+    "availability": "Availability",
+    "availabilityState": {
+      "available": "Available",
+      "reserved": "Reserved",
+      "sold": "Sold",
+      "rented": "Rented"
+    },
     "moderation": {
       "active": "Published",
       "pending_review": "Pending review",
@@ -151,7 +166,10 @@
     "rejectReasonPlaceholder": "Enter the rejection reason (required)",
     "rejectReasonRequired": "A rejection reason is required",
     "details": "Property details",
-    "moderated": "Property status updated"
+    "moderated": "Property status updated",
+    "deleted": "Property deleted",
+    "deleteTitle": "Delete property",
+    "deleteConfirm": "This property will be hidden from the app and admin dashboard."
   },
   "requests": {
     "title": "Property requests",
@@ -161,10 +179,22 @@
     "requestType": "Request type",
     "city": "City",
     "budget": "Budget",
+    "description": "Description",
+    "minPrice": "Min price",
+    "maxPrice": "Max price",
+    "requiredRooms": "Required rooms",
+    "contactMethod": "Contact method",
     "status": "Status",
     "urgent": "Urgent",
     "created": "Created",
     "filterStatus": "Filter by status",
+    "searchPlaceholder": "Search by request title, requester, phone, or date",
+    "statusUpdated": "Request status updated",
+    "saved": "Request saved",
+    "editTitle": "Edit request",
+    "deleted": "Request deleted",
+    "deleteTitle": "Delete request",
+    "deleteConfirm": "This request will be hidden from the app and admin dashboard.",
     "state": {
       "open": "Open",
       "in_progress": "In progress",
@@ -173,6 +203,11 @@
     "kind": {
       "buy": "Buy",
       "rent": "Rent"
+    },
+    "contact": {
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "in_app": "In-app"
     }
   },
   "broadcast": {

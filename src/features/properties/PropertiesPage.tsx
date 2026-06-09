@@ -2,18 +2,22 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { Search, Trash2 } from 'lucide-react';
 import {
+  deleteProperty,
   listProperties,
-  moderateProperty,
+  updateProperty,
+  updatePropertyStatus,
   type PropertiesQuery,
 } from '@/api/endpoints';
 import { AppFailure } from '@/api/errorMapper';
-import type { ModerationStatus, Property } from '@/api/types';
+import type { AvailabilityStatus, ModerationStatus, Property } from '@/api/types';
 import { PageHeader } from '@/components/PageHeader';
 import { DataTable, type Column } from '@/components/DataTable';
 import { RoleBadge } from '@/components/RoleBadge';
 import { StatusBadge, moderationTone } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -31,10 +35,40 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { formatDate, formatPrice } from '@/lib/format';
 
 const STATUSES: ModerationStatus[] = ['pending_review', 'active', 'rejected'];
+const AVAILABILITY_STATUSES: AvailabilityStatus[] = [
+  'available',
+  'reserved',
+  'sold',
+  'rented',
+];
 const ALL = '__all__';
+
+type PropertyDraft = {
+  title: string;
+  description: string;
+  price: string;
+  currency: string;
+  city: string;
+  area: string;
+  address: string;
+  rooms: string;
+  bathrooms: string;
+  sizeSqm: string;
+  floor: string;
+};
 
 export function PropertiesPage() {
   const { t } = useTranslation();
@@ -42,14 +76,21 @@ export function PropertiesPage() {
 
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<string>('pending_review');
+  const [search, setSearch] = useState('');
+  const [q, setQ] = useState('');
   const [selected, setSelected] = useState<Property | null>(null);
-  const [rejectMode, setRejectMode] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Property | null>(null);
+  const [statusDraft, setStatusDraft] = useState<ModerationStatus>('pending_review');
+  const [availabilityDraft, setAvailabilityDraft] =
+    useState<AvailabilityStatus>('available');
+  const [propertyDraft, setPropertyDraft] = useState<PropertyDraft | null>(null);
   const [reason, setReason] = useState('');
 
   const params: PropertiesQuery = {
     page,
     pageSize: 20,
     moderationStatus: status === ALL ? undefined : (status as ModerationStatus),
+    search: q || undefined,
   };
 
   const { data, isLoading, error } = useQuery({
@@ -57,12 +98,36 @@ export function PropertiesPage() {
     queryFn: () => listProperties(params),
   });
 
-  const mutation = useMutation({
+  const saveMutation = useMutation({
     mutationFn: (vars: {
       id: string;
-      action: 'approve' | 'reject';
+      details: PropertyDraft;
+      moderationStatus: ModerationStatus;
+      availabilityStatus: AvailabilityStatus;
       reason?: string;
-    }) => moderateProperty(vars.id, { action: vars.action, reason: vars.reason }),
+    }) => {
+      const details = vars.details;
+      return Promise.all([
+        updateProperty(vars.id, {
+          title: details.title.trim(),
+          description: details.description.trim(),
+          price: Number(details.price),
+          currency: details.currency.trim(),
+          city: details.city.trim(),
+          area: details.area.trim(),
+          address: details.address.trim() || undefined,
+          rooms: Number(details.rooms),
+          bathrooms: Number(details.bathrooms),
+          sizeSqm: Number(details.sizeSqm),
+          floor: details.floor.trim() ? Number(details.floor) : null,
+        }),
+        updatePropertyStatus(vars.id, {
+        moderationStatus: vars.moderationStatus,
+        availabilityStatus: vars.availabilityStatus,
+        reason: vars.reason,
+        }),
+      ]);
+    },
     onSuccess: () => {
       toast.success(t('properties.moderated'));
       void queryClient.invalidateQueries({ queryKey: ['properties'] });
@@ -74,10 +139,53 @@ export function PropertiesPage() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteProperty(id),
+    onSuccess: () => {
+      toast.success(t('properties.deleted'));
+      void queryClient.invalidateQueries({ queryKey: ['properties'] });
+      void queryClient.invalidateQueries({ queryKey: ['stats'] });
+      setDeleteTarget(null);
+      if (selected?.id === deleteTarget?.id) closeDialog();
+    },
+    onError: (err) => {
+      toast.error(err instanceof AppFailure ? err.message : t('common.error'));
+    },
+  });
+
+  const openDialog = (property: Property) => {
+    setSelected(property);
+    setStatusDraft(property.moderationStatus);
+    setAvailabilityDraft(property.availabilityStatus);
+    setPropertyDraft({
+      title: property.title,
+      description: property.description,
+      price: String(property.price),
+      currency: property.currency,
+      city: property.city,
+      area: property.area,
+      address: property.address ?? '',
+      rooms: String(property.rooms),
+      bathrooms: String(property.bathrooms),
+      sizeSqm: String(property.sizeSqm),
+      floor: property.floor == null ? '' : String(property.floor),
+    });
+    setReason(property.rejectionReason ?? '');
+  };
+
   const closeDialog = () => {
     setSelected(null);
-    setRejectMode(false);
+    setPropertyDraft(null);
     setReason('');
+  };
+
+  const updateDraft = (key: keyof PropertyDraft, value: string) => {
+    setPropertyDraft((draft) => (draft ? { ...draft, [key]: value } : draft));
+  };
+
+  const submitSearch = () => {
+    setPage(1);
+    setQ(search.trim());
   };
 
   const columns: Column<Property>[] = [
@@ -132,9 +240,19 @@ export function PropertiesPage() {
       header: t('common.actions'),
       className: 'text-end',
       cell: (p) => (
-        <Button variant="outline" size="sm" onClick={() => setSelected(p)}>
-          {t('common.view')}
-        </Button>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={() => openDialog(p)}>
+            {t('common.view')}
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setDeleteTarget(p)}
+          >
+            <Trash2 className="size-4" />
+            {t('common.delete')}
+          </Button>
+        </div>
       ),
     },
   ];
@@ -153,25 +271,39 @@ export function PropertiesPage() {
         page={page}
         onPageChange={setPage}
         toolbar={
-          <Select
-            value={status}
-            onValueChange={(v) => {
-              setStatus(v);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder={t('properties.filterStatus')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>{t('common.all')}</SelectItem>
-              {STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {t(`properties.moderation.${s}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <>
+            <div className="flex items-center gap-2">
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submitSearch()}
+                placeholder={t('properties.searchPlaceholder')}
+                className="w-72"
+              />
+              <Button variant="secondary" size="icon" onClick={submitSearch}>
+                <Search />
+              </Button>
+            </div>
+            <Select
+              value={status}
+              onValueChange={(v) => {
+                setStatus(v);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder={t('properties.filterStatus')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{t('common.all')}</SelectItem>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {t(`properties.moderation.${s}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
         }
       />
 
@@ -222,10 +354,6 @@ export function PropertiesPage() {
                 </div>
               ) : null}
 
-              <p className="max-h-32 overflow-y-auto whitespace-pre-wrap text-sm text-muted-foreground">
-                {selected.description}
-              </p>
-
               <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
                 <Info label={t('properties.city')}>
                   {selected.city} · {selected.area}
@@ -240,9 +368,140 @@ export function PropertiesPage() {
                     tone={moderationTone(selected.moderationStatus)}
                   />
                 </Info>
+                <Info label={t('properties.availability')}>
+                  {t(`properties.availabilityState.${selected.availabilityStatus}`)}
+                </Info>
               </div>
 
-              {rejectMode ? (
+              {propertyDraft ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label>{t('properties.propertyTitle')}</Label>
+                    <Input
+                      value={propertyDraft.title}
+                      onChange={(e) => updateDraft('title', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label>{t('properties.description')}</Label>
+                    <Textarea
+                      value={propertyDraft.description}
+                      onChange={(e) => updateDraft('description', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.price')}</Label>
+                    <Input
+                      type="number"
+                      value={propertyDraft.price}
+                      onChange={(e) => updateDraft('price', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.currency')}</Label>
+                    <Input
+                      value={propertyDraft.currency}
+                      onChange={(e) => updateDraft('currency', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.city')}</Label>
+                    <Input
+                      value={propertyDraft.city}
+                      onChange={(e) => updateDraft('city', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.area')}</Label>
+                    <Input
+                      value={propertyDraft.area}
+                      onChange={(e) => updateDraft('area', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label>{t('properties.address')}</Label>
+                    <Input
+                      value={propertyDraft.address}
+                      onChange={(e) => updateDraft('address', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.rooms')}</Label>
+                    <Input
+                      type="number"
+                      value={propertyDraft.rooms}
+                      onChange={(e) => updateDraft('rooms', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.bathrooms')}</Label>
+                    <Input
+                      type="number"
+                      value={propertyDraft.bathrooms}
+                      onChange={(e) => updateDraft('bathrooms', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.size')}</Label>
+                    <Input
+                      type="number"
+                      value={propertyDraft.sizeSqm}
+                      onChange={(e) => updateDraft('sizeSqm', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.floor')}</Label>
+                    <Input
+                      type="number"
+                      value={propertyDraft.floor}
+                      onChange={(e) => updateDraft('floor', e.target.value)}
+                    />
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>{t('properties.status')}</Label>
+                  <Select
+                    value={statusDraft}
+                    onValueChange={(v) => setStatusDraft(v as ModerationStatus)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {t(`properties.moderation.${s}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t('properties.availability')}</Label>
+                  <Select
+                    value={availabilityDraft}
+                    onValueChange={(v) =>
+                      setAvailabilityDraft(v as AvailabilityStatus)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AVAILABILITY_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {t(`properties.availabilityState.${s}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {statusDraft === 'rejected' ? (
                 <div className="space-y-1.5">
                   <Label htmlFor="rej">{t('properties.rejectReasonLabel')}</Label>
                   <Textarea
@@ -255,54 +514,59 @@ export function PropertiesPage() {
               ) : null}
 
               <DialogFooter>
-                {rejectMode ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() => setRejectMode(false)}
-                    >
-                      {t('common.cancel')}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      disabled={!reason.trim() || mutation.isPending}
-                      onClick={() =>
-                        mutation.mutate({
-                          id: selected.id,
-                          action: 'reject',
-                          reason: reason.trim(),
-                        })
-                      }
-                    >
-                      {t('properties.reject')}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setReason('');
-                        setRejectMode(true);
-                      }}
-                    >
-                      {t('properties.reject')}
-                    </Button>
-                    <Button
-                      disabled={mutation.isPending}
-                      onClick={() =>
-                        mutation.mutate({ id: selected.id, action: 'approve' })
-                      }
-                    >
-                      {t('properties.approve')}
-                    </Button>
-                  </>
-                )}
+                <Button variant="outline" onClick={closeDialog}>
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  disabled={
+                    saveMutation.isPending ||
+                    !propertyDraft ||
+                    (statusDraft === 'rejected' && !reason.trim())
+                  }
+                  onClick={() =>
+                    propertyDraft &&
+                    saveMutation.mutate({
+                      id: selected.id,
+                      details: propertyDraft,
+                      moderationStatus: statusDraft,
+                      availabilityStatus: availabilityDraft,
+                      reason: reason.trim() || undefined,
+                    })
+                  }
+                >
+                  {t('common.save')}
+                </Button>
               </DialogFooter>
             </>
           ) : null}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('properties.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('properties.deleteConfirm')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMutation.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
+              }}
+            >
+              {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
