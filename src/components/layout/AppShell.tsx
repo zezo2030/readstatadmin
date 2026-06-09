@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Bell,
   Building2,
@@ -14,6 +16,7 @@ import {
   Sun,
   Users,
 } from 'lucide-react';
+import { getPendingCount } from '@/api/endpoints';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -47,27 +50,62 @@ export function AppShell() {
 
   const nextLang: AppLanguage = i18n.language === 'ar' ? 'en' : 'ar';
 
+  // Near-real-time moderation queue: drives the sidebar badges and a toast when
+  // new items arrive. Polled (uncached endpoint) so the admin is alerted fast.
+  const { data: pending } = useQuery({
+    queryKey: ['pending-count'],
+    queryFn: getPendingCount,
+    refetchInterval: 15000,
+  });
+
+  const lastTotalRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!pending) return;
+    const stored = Number(localStorage.getItem('admin.lastPending'));
+    const prev =
+      lastTotalRef.current ?? (Number.isFinite(stored) ? stored : null);
+    if (prev !== null && pending.total > prev) {
+      toast.info(t('moderation.newPending', { count: pending.total }));
+    }
+    lastTotalRef.current = pending.total;
+    localStorage.setItem('admin.lastPending', String(pending.total));
+  }, [pending, t]);
+
+  const badgeFor = (key: string): number | undefined => {
+    if (key === 'properties') return pending?.properties || undefined;
+    if (key === 'requests') return pending?.requests || undefined;
+    return undefined;
+  };
+
   const navLinks = (
     <nav className="flex flex-col gap-1 p-3">
-      {NAV.map(({ to, icon: Icon, key, end }) => (
-        <NavLink
-          key={key}
-          to={to}
-          end={end}
-          onClick={() => setOpen(false)}
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-              isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-            )
-          }
-        >
-          <Icon className="size-4 shrink-0" />
-          {t(`nav.${key}`)}
-        </NavLink>
-      ))}
+      {NAV.map(({ to, icon: Icon, key, end }) => {
+        const badge = badgeFor(key);
+        return (
+          <NavLink
+            key={key}
+            to={to}
+            end={end}
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                isActive
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+              )
+            }
+          >
+            <Icon className="size-4 shrink-0" />
+            {t(`nav.${key}`)}
+            {badge ? (
+              <span className="ms-auto grid min-w-5 place-items-center rounded-full bg-destructive px-1.5 text-xs font-semibold text-destructive-foreground">
+                {badge}
+              </span>
+            ) : null}
+          </NavLink>
+        );
+      })}
     </nav>
   );
 

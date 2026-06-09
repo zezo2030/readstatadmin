@@ -155,8 +155,16 @@
       "land": "أرض",
       "shop": "محل",
       "villa": "فيلا",
-      "building": "مبنى"
+      "building": "مبنى",
+      "commercial": "تجاري"
     },
+    "images": "الصور",
+    "uploadImage": "رفع صورة",
+    "uploadFailed": "تعذّر رفع الصورة",
+    "contactSection": "بيانات التواصل مع المعلن",
+    "contactName": "اسم جهة التواصل",
+    "contactPhone": "هاتف جهة التواصل",
+    "contactPhonePlaceholder": "مثال: ‎+9665XXXXXXXX",
     "approve": "اعتماد",
     "reject": "رفض",
     "approveTitle": "اعتماد العقار",
@@ -209,6 +217,9 @@
       "whatsapp": "واتساب",
       "in_app": "داخل التطبيق"
     }
+  },
+  "moderation": {
+    "newPending": "وصل محتوى جديد بانتظار المراجعة ({{count}})"
   },
   "broadcast": {
     "title": "إرسال إشعار",

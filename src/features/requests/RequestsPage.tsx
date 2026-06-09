@@ -11,11 +11,15 @@ import {
   type RequestsQuery,
 } from '@/api/endpoints';
 import { AppFailure } from '@/api/errorMapper';
-import type { PropertyRequest, RequestStatus } from '@/api/types';
+import type {
+  ModerationStatus,
+  PropertyRequest,
+  RequestStatus,
+} from '@/api/types';
 import { PageHeader } from '@/components/PageHeader';
 import { DataTable, type Column } from '@/components/DataTable';
 import { RoleBadge } from '@/components/RoleBadge';
-import { StatusBadge, requestTone } from '@/components/StatusBadge';
+import { StatusBadge, moderationTone, requestTone } from '@/components/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,7 +53,20 @@ import {
 import { formatDate, formatPrice } from '@/lib/format';
 
 const STATUSES: RequestStatus[] = ['open', 'in_progress', 'closed'];
-const PROPERTY_TYPES = ['apartment', 'house', 'land', 'shop', 'villa', 'building'];
+const MODERATION_STATUSES: ModerationStatus[] = [
+  'pending_review',
+  'active',
+  'rejected',
+];
+const PROPERTY_TYPES = [
+  'apartment',
+  'house',
+  'land',
+  'shop',
+  'villa',
+  'building',
+  'commercial',
+];
 const REQUEST_TYPES = ['buy', 'rent'];
 const CONTACT_METHODS = ['call', 'whatsapp', 'in_app'];
 const ALL = '__all__';
@@ -68,6 +85,8 @@ type RequestDraft = {
   approxSizeSqm: string;
   isUrgent: boolean;
   contactMethod: string;
+  contactName: string;
+  contactPhone: string;
   status: RequestStatus;
 };
 
@@ -76,16 +95,22 @@ export function RequestsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<string>(ALL);
+  const [moderation, setModeration] = useState<string>('pending_review');
   const [search, setSearch] = useState('');
   const [q, setQ] = useState('');
   const [editTarget, setEditTarget] = useState<PropertyRequest | null>(null);
   const [requestDraft, setRequestDraft] = useState<RequestDraft | null>(null);
+  const [moderationDraft, setModerationDraft] =
+    useState<ModerationStatus>('pending_review');
+  const [moderationReason, setModerationReason] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<PropertyRequest | null>(null);
 
   const params: RequestsQuery = {
     page,
     pageSize: 20,
     status: status === ALL ? undefined : (status as RequestStatus),
+    moderationStatus:
+      moderation === ALL ? undefined : (moderation as ModerationStatus),
     search: q || undefined,
   };
 
@@ -96,7 +121,7 @@ export function RequestsPage() {
 
   const statusMutation = useMutation({
     mutationFn: (vars: { id: string; status: RequestStatus }) =>
-      updateRequestStatus(vars.id, vars.status),
+      updateRequestStatus(vars.id, { status: vars.status }),
     onSuccess: () => {
       toast.success(t('requests.statusUpdated'));
       void queryClient.invalidateQueries({ queryKey: ['requests'] });
@@ -141,13 +166,18 @@ export function RequestsPage() {
       approxSizeSqm: request.approxSizeSqm == null ? '' : String(request.approxSizeSqm),
       isUrgent: request.isUrgent ?? false,
       contactMethod: request.contactMethod ?? 'in_app',
+      contactName: request.contactName ?? '',
+      contactPhone: request.contactPhone ?? '',
       status: request.status,
     });
+    setModerationDraft(request.moderationStatus);
+    setModerationReason(request.rejectionReason ?? '');
   };
 
   const closeEdit = () => {
     setEditTarget(null);
     setRequestDraft(null);
+    setModerationReason('');
   };
 
   const updateDraft = <K extends keyof RequestDraft>(
@@ -158,8 +188,14 @@ export function RequestsPage() {
   };
 
   const saveMutation = useMutation({
-    mutationFn: (vars: { id: string; details: RequestDraft }) =>
-      updateRequest(vars.id, {
+    mutationFn: async (vars: {
+      id: string;
+      details: RequestDraft;
+      moderationStatus: ModerationStatus;
+      moderationReason: string;
+      prevModeration: ModerationStatus;
+    }) => {
+      await updateRequest(vars.id, {
         title: vars.details.title.trim(),
         description: vars.details.description.trim(),
         propertyType: vars.details.propertyType as never,
@@ -175,8 +211,17 @@ export function RequestsPage() {
           : undefined,
         isUrgent: vars.details.isUrgent,
         contactMethod: vars.details.contactMethod as never,
+        contactName: vars.details.contactName.trim(),
+        contactPhone: vars.details.contactPhone.trim(),
         status: vars.details.status,
-      }),
+      });
+      if (vars.moderationStatus !== vars.prevModeration) {
+        await updateRequestStatus(vars.id, {
+          moderationStatus: vars.moderationStatus,
+          reason: vars.moderationReason.trim() || undefined,
+        });
+      }
+    },
     onSuccess: () => {
       toast.success(t('requests.saved'));
       void queryClient.invalidateQueries({ queryKey: ['requests'] });
@@ -261,6 +306,16 @@ export function RequestsPage() {
       ),
     },
     {
+      key: 'moderation',
+      header: t('properties.status'),
+      cell: (r) => (
+        <StatusBadge
+          label={t(`properties.moderation.${r.moderationStatus}`)}
+          tone={moderationTone(r.moderationStatus)}
+        />
+      ),
+    },
+    {
       key: 'created',
       header: t('requests.created'),
       cell: (r) => formatDate(r.createdAt),
@@ -313,6 +368,25 @@ export function RequestsPage() {
                 <Search />
               </Button>
             </div>
+            <Select
+              value={moderation}
+              onValueChange={(v) => {
+                setModeration(v);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder={t('properties.filterStatus')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{t('common.all')}</SelectItem>
+                {MODERATION_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {t(`properties.moderation.${s}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select
               value={status}
               onValueChange={(v) => {
@@ -465,6 +539,54 @@ export function RequestsPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1.5 sm:col-span-2 rounded-lg border border-dashed p-3">
+                  <div className="mb-1 text-xs font-medium text-muted-foreground">
+                    {t('properties.contactSection')}
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label>{t('properties.contactName')}</Label>
+                      <Input
+                        value={requestDraft.contactName}
+                        onChange={(e) =>
+                          updateDraft('contactName', e.target.value)
+                        }
+                        placeholder={editTarget.requester.displayName}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>{t('properties.contactPhone')}</Label>
+                      <Input
+                        value={requestDraft.contactPhone}
+                        onChange={(e) =>
+                          updateDraft('contactPhone', e.target.value)
+                        }
+                        placeholder={t('properties.contactPhonePlaceholder')}
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t('properties.status')}</Label>
+                  <Select
+                    value={moderationDraft}
+                    onValueChange={(v) =>
+                      setModerationDraft(v as ModerationStatus)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MODERATION_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {t(`properties.moderation.${s}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-1.5">
                   <Label>{t('requests.status')}</Label>
                   <Select
@@ -490,17 +612,33 @@ export function RequestsPage() {
                   />
                   <Label>{t('requests.urgent')}</Label>
                 </div>
+                {moderationDraft === 'rejected' ? (
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label>{t('properties.rejectReasonLabel')}</Label>
+                    <Textarea
+                      value={moderationReason}
+                      onChange={(e) => setModerationReason(e.target.value)}
+                      placeholder={t('properties.rejectReasonPlaceholder')}
+                    />
+                  </div>
+                ) : null}
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={closeEdit}>
                   {t('common.cancel')}
                 </Button>
                 <Button
-                  disabled={saveMutation.isPending}
+                  disabled={
+                    saveMutation.isPending ||
+                    (moderationDraft === 'rejected' && !moderationReason.trim())
+                  }
                   onClick={() =>
                     saveMutation.mutate({
                       id: editTarget.id,
                       details: requestDraft,
+                      moderationStatus: moderationDraft,
+                      moderationReason,
+                      prevModeration: editTarget.moderationStatus,
                     })
                   }
                 >

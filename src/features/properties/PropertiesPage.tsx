@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Search, Trash2 } from 'lucide-react';
+import { ImagePlus, Loader2, Search, Trash2, X } from 'lucide-react';
 import {
   deleteProperty,
   listProperties,
   updateProperty,
   updatePropertyStatus,
+  uploadImage,
   type PropertiesQuery,
 } from '@/api/endpoints';
 import { AppFailure } from '@/api/errorMapper';
@@ -54,16 +55,32 @@ const AVAILABILITY_STATUSES: AvailabilityStatus[] = [
   'sold',
   'rented',
 ];
+const PROPERTY_TYPES = [
+  'apartment',
+  'house',
+  'land',
+  'shop',
+  'villa',
+  'building',
+  'commercial',
+];
+const LISTING_TYPES = ['sale', 'rent'];
 const ALL = '__all__';
+
+type PropertyImageDraft = { objectKey: string; url: string };
 
 type PropertyDraft = {
   title: string;
   description: string;
+  propertyType: string;
+  listingType: string;
   price: string;
   currency: string;
   city: string;
   area: string;
   address: string;
+  contactName: string;
+  contactPhone: string;
   rooms: string;
   bathrooms: string;
   sizeSqm: string;
@@ -84,6 +101,10 @@ export function PropertiesPage() {
   const [availabilityDraft, setAvailabilityDraft] =
     useState<AvailabilityStatus>('available');
   const [propertyDraft, setPropertyDraft] = useState<PropertyDraft | null>(null);
+  const [images, setImages] = useState<PropertyImageDraft[]>([]);
+  const [initialImageKeys, setInitialImageKeys] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [reason, setReason] = useState('');
 
   const params: PropertiesQuery = {
@@ -102,6 +123,7 @@ export function PropertiesPage() {
     mutationFn: (vars: {
       id: string;
       details: PropertyDraft;
+      imageObjectKeys?: string[];
       moderationStatus: ModerationStatus;
       availabilityStatus: AvailabilityStatus;
       reason?: string;
@@ -111,20 +133,27 @@ export function PropertiesPage() {
         updateProperty(vars.id, {
           title: details.title.trim(),
           description: details.description.trim(),
+          propertyType: details.propertyType as never,
+          listingType: details.listingType as never,
           price: Number(details.price),
           currency: details.currency.trim(),
           city: details.city.trim(),
           area: details.area.trim(),
           address: details.address.trim() || undefined,
+          contactName: details.contactName.trim(),
+          contactPhone: details.contactPhone.trim(),
           rooms: Number(details.rooms),
           bathrooms: Number(details.bathrooms),
           sizeSqm: Number(details.sizeSqm),
           floor: details.floor.trim() ? Number(details.floor) : null,
+          ...(vars.imageObjectKeys
+            ? { imageObjectKeys: vars.imageObjectKeys }
+            : {}),
         }),
         updatePropertyStatus(vars.id, {
-        moderationStatus: vars.moderationStatus,
-        availabilityStatus: vars.availabilityStatus,
-        reason: vars.reason,
+          moderationStatus: vars.moderationStatus,
+          availabilityStatus: vars.availabilityStatus,
+          reason: vars.reason,
         }),
       ]);
     },
@@ -160,28 +189,66 @@ export function PropertiesPage() {
     setPropertyDraft({
       title: property.title,
       description: property.description,
+      propertyType: property.propertyType,
+      listingType: property.listingType,
       price: String(property.price),
       currency: property.currency,
       city: property.city,
       area: property.area,
       address: property.address ?? '',
+      contactName: property.contactName ?? '',
+      contactPhone: property.contactPhone ?? '',
       rooms: String(property.rooms),
       bathrooms: String(property.bathrooms),
       sizeSqm: String(property.sizeSqm),
       floor: property.floor == null ? '' : String(property.floor),
     });
+    const sorted = (property.images ?? [])
+      .slice()
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((img) => ({ objectKey: img.objectKey, url: img.url }));
+    setImages(sorted);
+    setInitialImageKeys(sorted.map((i) => i.objectKey));
     setReason(property.rejectionReason ?? '');
   };
 
   const closeDialog = () => {
     setSelected(null);
     setPropertyDraft(null);
+    setImages([]);
+    setInitialImageKeys([]);
     setReason('');
   };
 
   const updateDraft = (key: keyof PropertyDraft, value: string) => {
     setPropertyDraft((draft) => (draft ? { ...draft, [key]: value } : draft));
   };
+
+  const onPickImages = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setUploading(true);
+    try {
+      const uploaded: PropertyImageDraft[] = [];
+      for (const file of Array.from(files)) {
+        const objectKey = await uploadImage(file);
+        uploaded.push({ objectKey, url: URL.createObjectURL(file) });
+      }
+      setImages((prev) => [...prev, ...uploaded]);
+    } catch {
+      toast.error(t('properties.uploadFailed'));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removeImage = (objectKey: string) => {
+    setImages((prev) => prev.filter((img) => img.objectKey !== objectKey));
+  };
+
+  const imagesChanged =
+    JSON.stringify(images.map((i) => i.objectKey)) !==
+    JSON.stringify(initialImageKeys);
 
   const submitSearch = () => {
     setPage(1);
@@ -320,22 +387,55 @@ export function PropertiesPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              {selected.images?.length ? (
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {selected.images
-                    .slice()
-                    .sort((a, b) => a.sortOrder - b.sortOrder)
-                    .map((img) => (
+              <div className="space-y-1.5">
+                <Label>{t('properties.images')}</Label>
+                <div className="flex flex-wrap gap-2">
+                  {images.map((img) => (
+                    <div
+                      key={img.objectKey}
+                      className="group relative h-24 w-32 shrink-0 overflow-hidden rounded-lg border"
+                    >
                       <img
-                        key={img.url}
                         src={img.url}
                         alt=""
-                        className="h-32 w-44 shrink-0 rounded-lg border object-cover"
+                        className="h-full w-full object-cover"
                         loading="lazy"
                       />
-                    ))}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(img.objectKey)}
+                        className="absolute end-1 top-1 grid size-6 place-items-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        aria-label={t('common.delete')}
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="grid h-24 w-32 shrink-0 place-items-center rounded-lg border border-dashed text-muted-foreground hover:bg-accent disabled:opacity-50"
+                  >
+                    {uploading ? (
+                      <Loader2 className="size-5 animate-spin" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-1 text-xs">
+                        <ImagePlus className="size-5" />
+                        {t('properties.uploadImage')}
+                      </div>
+                    )}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    hidden
+                    onChange={(e) => void onPickImages(e.target.files)}
+                  />
                 </div>
-              ) : null}
+              </div>
 
               {selected.videos?.length ? (
                 <div className="flex gap-2 overflow-x-auto pb-1">
@@ -390,6 +490,42 @@ export function PropertiesPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
+                    <Label>{t('properties.type')}</Label>
+                    <Select
+                      value={propertyDraft.propertyType}
+                      onValueChange={(v) => updateDraft('propertyType', v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PROPERTY_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {t(`properties.kind.${type}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>{t('properties.listingType')}</Label>
+                    <Select
+                      value={propertyDraft.listingType}
+                      onValueChange={(v) => updateDraft('listingType', v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LISTING_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {t(`properties.listing.${type}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
                     <Label>{t('properties.price')}</Label>
                     <Input
                       type="number"
@@ -424,6 +560,34 @@ export function PropertiesPage() {
                       value={propertyDraft.address}
                       onChange={(e) => updateDraft('address', e.target.value)}
                     />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2 rounded-lg border border-dashed p-3">
+                    <div className="mb-1 text-xs font-medium text-muted-foreground">
+                      {t('properties.contactSection')}
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label>{t('properties.contactName')}</Label>
+                        <Input
+                          value={propertyDraft.contactName}
+                          onChange={(e) =>
+                            updateDraft('contactName', e.target.value)
+                          }
+                          placeholder={selected.owner.displayName}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>{t('properties.contactPhone')}</Label>
+                        <Input
+                          value={propertyDraft.contactPhone}
+                          onChange={(e) =>
+                            updateDraft('contactPhone', e.target.value)
+                          }
+                          placeholder={t('properties.contactPhonePlaceholder')}
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label>{t('properties.rooms')}</Label>
@@ -520,7 +684,9 @@ export function PropertiesPage() {
                 <Button
                   disabled={
                     saveMutation.isPending ||
+                    uploading ||
                     !propertyDraft ||
+                    images.length === 0 ||
                     (statusDraft === 'rejected' && !reason.trim())
                   }
                   onClick={() =>
@@ -528,6 +694,9 @@ export function PropertiesPage() {
                     saveMutation.mutate({
                       id: selected.id,
                       details: propertyDraft,
+                      imageObjectKeys: imagesChanged
+                        ? images.map((i) => i.objectKey)
+                        : undefined,
                       moderationStatus: statusDraft,
                       availabilityStatus: availabilityDraft,
                       reason: reason.trim() || undefined,

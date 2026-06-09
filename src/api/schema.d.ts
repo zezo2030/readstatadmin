@@ -401,6 +401,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/me/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change owner / super-admin password (owner account only)
+         * @description Self-service password change for the single locked owner account. Other admin accounts receive 403 — password control stays with the owner.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    /**
+                     * @example {
+                     *       "currentPassword": "oldSup3rsecret",
+                     *       "newPassword": "newSup3rsecret"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ChangeOwnerPassword"];
+                };
+            };
+            responses: {
+                /** @description Password updated; all sessions are revoked */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                422: components["responses"]["UnprocessableEntity"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/select-role": {
         parameters: {
             query?: never;
@@ -1858,6 +1908,8 @@ export interface paths {
                     page?: number;
                     pageSize?: number;
                     moderationStatus?: "active" | "pending_review" | "rejected";
+                    search?: string;
+                    id?: string;
                 };
                 header?: never;
                 path?: never;
@@ -1948,6 +2000,7 @@ export interface paths {
                     page?: number;
                     pageSize?: number;
                     status?: "open" | "in_progress" | "closed";
+                    moderationStatus?: "active" | "pending_review" | "rejected";
                 };
                 header?: never;
                 path?: never;
@@ -1964,6 +2017,42 @@ export interface paths {
                         "application/json": components["schemas"]["OffsetPage"] & {
                             items?: components["schemas"]["PropertyRequest"][];
                         };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/moderation/pending-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Count of items awaiting review (drives the dashboard badge/toast) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Pending counts */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PendingCount"];
                     };
                 };
             };
@@ -2739,7 +2828,7 @@ export interface components {
         /** @enum {string} */
         Role: "RegularUser" | "Broker" | "Admin";
         /** @enum {string} */
-        PropertyType: "apartment" | "house" | "land" | "shop" | "villa" | "building";
+        PropertyType: "apartment" | "house" | "land" | "shop" | "villa" | "building" | "commercial";
         CursorPage: {
             items: unknown[];
             nextCursor?: string | null;
@@ -2784,6 +2873,10 @@ export interface components {
             email: string;
             resetToken: string;
             password: string;
+        };
+        ChangeOwnerPassword: {
+            currentPassword: string;
+            newPassword: string;
         };
         AuthSession: {
             accessToken: string;
@@ -2836,6 +2929,8 @@ export interface components {
         };
         /** @description Returned only by /properties/{id}/contact and /property-requests/{id}/contact (audit-logged) */
         ContactInfo: {
+            /** @description Per-listing contact override, falling back to the account display name */
+            name: string;
             /** Format: email */
             email: string;
             phone?: string | null;
@@ -2846,11 +2941,15 @@ export interface components {
             /** Format: uri */
             url: string;
             sortOrder: number;
+            /** @description Object-store key; used by the admin editor to preserve existing images */
+            objectKey: string;
         };
         Video: {
             /** Format: uri */
             url: string;
             sortOrder: number;
+            /** @description Object-store key */
+            objectKey: string;
         };
         PropertySummary: {
             id: string;
@@ -2884,6 +2983,8 @@ export interface components {
             city: string;
             area: string;
             address?: string | null;
+            contactName?: string | null;
+            contactPhone?: string | null;
             rooms: number;
             bathrooms: number;
             sizeSqm: number;
@@ -2916,6 +3017,8 @@ export interface components {
             city: string;
             area: string;
             address?: string;
+            contactName?: string;
+            contactPhone?: string;
             rooms: number;
             bathrooms: number;
             sizeSqm: number;
@@ -2933,11 +3036,16 @@ export interface components {
         PropertyUpdate: {
             title?: string;
             description?: string;
+            propertyType?: components["schemas"]["PropertyType"];
+            /** @enum {string} */
+            listingType?: "sale" | "rent";
             price?: number;
             currency?: string;
             city?: string;
             area?: string;
             address?: string;
+            contactName?: string;
+            contactPhone?: string;
             rooms?: number;
             bathrooms?: number;
             sizeSqm?: number;
@@ -2967,8 +3075,13 @@ export interface components {
             isUrgent?: boolean;
             /** @enum {string} */
             contactMethod?: "call" | "whatsapp" | "in_app";
+            contactName?: string | null;
+            contactPhone?: string | null;
             /** @enum {string} */
             status: "open" | "in_progress" | "closed";
+            /** @enum {string} */
+            moderationStatus: "active" | "pending_review" | "rejected";
+            rejectionReason?: string | null;
             /** Format: date-time */
             expiresAt?: string | null;
             /** Format: date-time */
@@ -2993,6 +3106,8 @@ export interface components {
             isUrgent: boolean;
             /** @enum {string} */
             contactMethod: "call" | "whatsapp" | "in_app";
+            contactName?: string;
+            contactPhone?: string;
             /** Format: date-time */
             expiresAt?: string;
         };
@@ -3012,6 +3127,8 @@ export interface components {
             isUrgent?: boolean;
             /** @enum {string} */
             contactMethod?: "call" | "whatsapp" | "in_app";
+            contactName?: string;
+            contactPhone?: string;
             /** @enum {string} */
             status?: "open" | "in_progress" | "closed";
             /** Format: date-time */
@@ -3064,6 +3181,11 @@ export interface components {
             type: "City" | "Area";
             parentId?: string | null;
             isActive: boolean;
+        };
+        PendingCount: {
+            properties: number;
+            requests: number;
+            total: number;
         };
         Stats: {
             users: {

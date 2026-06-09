@@ -13,6 +13,7 @@ export type PropertyRequestUpdate = Schemas['PropertyRequestUpdate'];
 export type Report = Schemas['Report'];
 export type Location = Schemas['Location'];
 export type Stats = Schemas['Stats'];
+export type PendingCount = Schemas['PendingCount'];
 export type Banner = Schemas['Banner'];
 export type BannerCreate = Schemas['BannerCreate'];
 export type BannerUpdate = Schemas['BannerUpdate'];

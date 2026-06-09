@@ -10,6 +10,7 @@ import type {
   BroadcastAudience,
   ModerationStatus,
   OffsetPage,
+  PendingCount,
   Property,
   PropertyUpdate,
   PropertyRequest,
@@ -33,6 +34,10 @@ const qs = (params: Record<string, unknown>): string => {
 
 // ---- stats ----
 export const getStats = () => request<Stats>('get', '/admin/stats');
+
+// ---- moderation ----
+export const getPendingCount = () =>
+  request<PendingCount>('get', '/admin/moderation/pending-count');
 
 // ---- users ----
 export type UsersQuery = {
@@ -92,6 +97,7 @@ export type RequestsQuery = {
   page?: number;
   pageSize?: number;
   status?: RequestStatus;
+  moderationStatus?: ModerationStatus;
   search?: string;
 };
 export const listRequests = (params: RequestsQuery) =>
@@ -100,9 +106,16 @@ export const listRequests = (params: RequestsQuery) =>
     `/admin/property-requests${qs(params)}`,
   );
 
-export const updateRequestStatus = (id: string, status: RequestStatus) =>
+export const updateRequestStatus = (
+  id: string,
+  body: {
+    status?: RequestStatus;
+    moderationStatus?: ModerationStatus;
+    reason?: string;
+  },
+) =>
   request<PropertyRequest>('patch', `/admin/property-requests/${id}/status`, {
-    data: { status },
+    data: body,
   });
 
 export const updateRequest = (id: string, body: PropertyRequestUpdate) =>

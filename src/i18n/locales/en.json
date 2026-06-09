@@ -155,8 +155,16 @@
       "land": "Land",
       "shop": "Shop",
       "villa": "Villa",
-      "building": "Building"
+      "building": "Building",
+      "commercial": "Commercial"
     },
+    "images": "Images",
+    "uploadImage": "Upload",
+    "uploadFailed": "Image upload failed",
+    "contactSection": "Advertiser contact details",
+    "contactName": "Contact name",
+    "contactPhone": "Contact phone",
+    "contactPhonePlaceholder": "e.g. +9665XXXXXXXX",
     "approve": "Approve",
     "reject": "Reject",
     "approveTitle": "Approve property",
@@ -170,6 +178,9 @@
     "deleted": "Property deleted",
     "deleteTitle": "Delete property",
     "deleteConfirm": "This property will be hidden from the app and admin dashboard."
+  },
+  "moderation": {
+    "newPending": "New content awaiting review ({{count}})"
   },
   "requests": {
     "title": "Property requests",
