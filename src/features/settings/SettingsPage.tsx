@@ -332,6 +332,12 @@ function BlockedIdentitiesSection() {
           error={error}
           rowKey={(b) => b.id}
           page={1}
+          pageInfo={{
+            page: 1,
+            pageSize: data?.items?.length ?? 0,
+            totalItems: data?.items?.length ?? 0,
+            totalPages: 1,
+          }}
           onPageChange={() => {}}
         />
       </CardContent>
