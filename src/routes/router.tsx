@@ -10,10 +10,16 @@ import { BroadcastPage } from '@/features/broadcast/BroadcastPage';
 import { BannersPage } from '@/features/banners/BannersPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { PrivacyPolicyPage } from '@/features/legal/PrivacyPolicyPage';
+import { PublicListingPage } from '@/features/public/PublicListingPage';
+import { PublicRequestPage } from '@/features/public/PublicRequestPage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/privacy-policy', element: <PrivacyPolicyPage /> },
+  // Public share landing pages (no auth) — what a shared listing/request link
+  // resolves to when Android App Links don't open the app directly.
+  { path: '/listing/:id', element: <PublicListingPage /> },
+  { path: '/request/:id', element: <PublicRequestPage /> },
   {
     element: <ProtectedRoute />,
     children: [
