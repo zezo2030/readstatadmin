@@ -9,9 +9,11 @@ import { RequestsPage } from '@/features/requests/RequestsPage';
 import { BroadcastPage } from '@/features/broadcast/BroadcastPage';
 import { BannersPage } from '@/features/banners/BannersPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { PrivacyPolicyPage } from '@/features/legal/PrivacyPolicyPage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: '/privacy-policy', element: <PrivacyPolicyPage /> },
   {
     element: <ProtectedRoute />,
     children: [

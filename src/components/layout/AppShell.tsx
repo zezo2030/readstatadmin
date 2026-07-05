@@ -29,6 +29,7 @@ import {
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/auth/authStore';
 import { setLanguage, type AppLanguage } from '@/i18n';
+import { AppLogo } from '@/components/AppLogo';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -114,9 +115,7 @@ export function AppShell() {
       {/* Sidebar (desktop) */}
       <aside className="hidden w-64 shrink-0 border-e bg-card md:block">
         <div className="flex h-14 items-center gap-2 border-b px-5">
-          <div className="grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground font-bold">
-            ع
-          </div>
+          <AppLogo size="sm" />
           <div className="leading-tight">
             <div className="text-sm font-bold">{t('app.title')}</div>
             <div className="text-xs text-muted-foreground">
@@ -136,6 +135,7 @@ export function AppShell() {
           />
           <aside className="absolute inset-y-0 start-0 w-64 border-e bg-card">
             <div className="flex h-14 items-center gap-2 border-b px-5">
+              <AppLogo size="sm" />
               <div className="text-sm font-bold">{t('app.title')}</div>
             </div>
             {navLinks}

@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/auth/authStore';
 import { AppFailure } from '@/api/errorMapper';
 import { useTheme } from '@/lib/theme';
+import { AppLogo } from '@/components/AppLogo';
 import { setLanguage, type AppLanguage } from '@/i18n';
 
 const schema = z.object({
@@ -73,9 +74,7 @@ export function LoginPage() {
 
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
-          <div className="mb-2 grid size-12 place-items-center rounded-2xl bg-primary text-2xl font-bold text-primary-foreground">
-            ع
-          </div>
+          <AppLogo size="lg" className="mb-2" />
           <CardTitle className="text-xl">{t('login.title')}</CardTitle>
           <CardDescription>{t('login.subtitle')}</CardDescription>
         </CardHeader>
