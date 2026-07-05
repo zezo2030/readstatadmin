@@ -3269,11 +3269,17 @@ export interface components {
             sliderEnabled: boolean;
             maxListingImages: number;
             maxListingVideos: number;
+            /** @description Support contact phone in international format; empty string hides the call button. */
+            supportPhone: string;
+            /** @description Support WhatsApp number or wa.me URL; empty string hides the WhatsApp button. */
+            supportWhatsapp: string;
         };
         AppSettingsUpdate: {
             sliderEnabled?: boolean;
             maxListingImages?: number;
             maxListingVideos?: number;
+            supportPhone?: string;
+            supportWhatsapp?: string;
         };
         BlockedIdentity: {
             id: string;

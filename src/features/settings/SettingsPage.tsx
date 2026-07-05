@@ -61,6 +61,8 @@ export function SettingsPage() {
         sliderEnabled: body.sliderEnabled,
         maxListingImages: body.maxListingImages,
         maxListingVideos: body.maxListingVideos,
+        supportPhone: body.supportPhone,
+        supportWhatsapp: body.supportWhatsapp,
       }),
     onSuccess: (updated) => {
       toast.success(t('settings.saved'));
@@ -138,6 +140,47 @@ export function SettingsPage() {
                       })
                     }
                   />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label>{t('settings.support')}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t('settings.supportHint')}
+                </p>
+                <div className="flex flex-wrap gap-6 pt-1">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="support-phone">
+                      {t('settings.supportPhone')}
+                    </Label>
+                    <Input
+                      id="support-phone"
+                      type="tel"
+                      dir="ltr"
+                      placeholder="+201001234567"
+                      className="w-52"
+                      value={form.supportPhone}
+                      onChange={(e) =>
+                        setForm({ ...form, supportPhone: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="support-whatsapp">
+                      {t('settings.supportWhatsapp')}
+                    </Label>
+                    <Input
+                      id="support-whatsapp"
+                      type="tel"
+                      dir="ltr"
+                      placeholder="+201001234567"
+                      className="w-52"
+                      value={form.supportWhatsapp}
+                      onChange={(e) =>
+                        setForm({ ...form, supportWhatsapp: e.target.value })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
 
