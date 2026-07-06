@@ -177,7 +177,16 @@
     "moderated": "Property status updated",
     "deleted": "Property deleted",
     "deleteTitle": "Delete property",
-    "deleteConfirm": "This property will be hidden from the app and admin dashboard."
+    "deleteConfirm": "This property will be hidden from the app and admin dashboard.",
+    "promote": "Promote as notification",
+    "promoteTitle": "Promote property as notification",
+    "promoteSubtitle": "This property will reach all users as a push notification; tapping it opens the property details inside the app.",
+    "promoteOnlyPublished": "Only published properties can be promoted.",
+    "promoteMessageTitle": "Notification title",
+    "promoteBody": "Notification body",
+    "promoteLink": "Link when tapped",
+    "promoteSend": "Send notification",
+    "promoteQueued": "Property sent as a notification to users"
   },
   "moderation": {
     "newPending": "New content awaiting review ({{count}})"

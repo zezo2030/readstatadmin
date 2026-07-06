@@ -2,17 +2,23 @@ import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ImagePlus, Loader2, Search, Trash2, X } from 'lucide-react';
+import { ImagePlus, Loader2, Megaphone, Search, Send, Trash2, X } from 'lucide-react';
 import {
   deleteProperty,
   listProperties,
+  sendBroadcast,
   updateProperty,
   updatePropertyStatus,
   uploadImage,
   type PropertiesQuery,
 } from '@/api/endpoints';
 import { AppFailure } from '@/api/errorMapper';
-import type { AvailabilityStatus, ModerationStatus, Property } from '@/api/types';
+import type {
+  AvailabilityStatus,
+  BroadcastAudience,
+  ModerationStatus,
+  Property,
+} from '@/api/types';
 import { PageHeader } from '@/components/PageHeader';
 import { DataTable, type Column } from '@/components/DataTable';
 import { RoleBadge } from '@/components/RoleBadge';
@@ -67,6 +73,13 @@ const PROPERTY_TYPES = [
 const LISTING_TYPES = ['sale', 'rent'];
 const ALL = '__all__';
 
+const PROMOTE_AUDIENCES: { value: BroadcastAudience; key: string }[] = [
+  { value: 'all', key: 'audienceAll' },
+  { value: 'regular_users', key: 'audienceRegular' },
+  { value: 'brokers', key: 'audienceBrokers' },
+];
+const LISTING_LINK_BASE = 'https://riden74.com/listing';
+
 type PropertyImageDraft = { objectKey: string; url: string };
 
 type PropertyDraft = {
@@ -101,6 +114,10 @@ export function PropertiesPage() {
   const [availabilityDraft, setAvailabilityDraft] =
     useState<AvailabilityStatus>('available');
   const [propertyDraft, setPropertyDraft] = useState<PropertyDraft | null>(null);
+  const [promoteTarget, setPromoteTarget] = useState<Property | null>(null);
+  const [promoteAudience, setPromoteAudience] = useState<BroadcastAudience>('all');
+  const [promoteTitle, setPromoteTitle] = useState('');
+  const [promoteBody, setPromoteBody] = useState('');
   const [images, setImages] = useState<PropertyImageDraft[]>([]);
   const [initialImageKeys, setInitialImageKeys] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -181,6 +198,41 @@ export function PropertiesPage() {
       toast.error(err instanceof AppFailure ? err.message : t('common.error'));
     },
   });
+
+  const promoteMutation = useMutation({
+    mutationFn: (vars: {
+      id: string;
+      audience: BroadcastAudience;
+      title: string;
+      body: string;
+    }) =>
+      sendBroadcast({
+        audience: vars.audience,
+        title: vars.title,
+        body: vars.body,
+        data: { targetKind: 'listing', targetId: vars.id },
+      }),
+    onSuccess: () => {
+      toast.success(t('properties.promoteQueued'));
+      setPromoteTarget(null);
+    },
+    onError: (err) => {
+      toast.error(err instanceof AppFailure ? err.message : t('common.error'));
+    },
+  });
+
+  const openPromote = (property: Property) => {
+    setPromoteTarget(property);
+    setPromoteAudience('all');
+    setPromoteTitle(property.title.slice(0, 140));
+    const location = [property.city, property.area].filter(Boolean).join(' · ');
+    setPromoteBody(
+      [location, formatPrice(property.price, property.currency)]
+        .filter(Boolean)
+        .join(' — ')
+        .slice(0, 500),
+    );
+  };
 
   const openDialog = (property: Property) => {
     setSelected(property);
@@ -311,6 +363,17 @@ export function PropertiesPage() {
           <Button variant="outline" size="sm" onClick={() => openDialog(p)}>
             {t('common.view')}
           </Button>
+          {p.moderationStatus === 'active' ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => openPromote(p)}
+              title={t('properties.promote')}
+            >
+              <Megaphone className="size-4" />
+              {t('properties.promote')}
+            </Button>
+          ) : null}
           <Button
             variant="destructive"
             size="sm"
@@ -704,6 +767,118 @@ export function PropertiesPage() {
                   }
                 >
                   {t('common.save')}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!promoteTarget}
+        onOpenChange={(o) => !o && setPromoteTarget(null)}
+      >
+        <DialogContent className="max-w-lg">
+          {promoteTarget ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t('properties.promoteTitle')}</DialogTitle>
+                <DialogDescription>
+                  {t('properties.promoteSubtitle')}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label>{t('broadcast.audience')}</Label>
+                  <Select
+                    value={promoteAudience}
+                    onValueChange={(v) =>
+                      setPromoteAudience(v as BroadcastAudience)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROMOTE_AUDIENCES.map((a) => (
+                        <SelectItem key={a.value} value={a.value}>
+                          {t(`broadcast.${a.key}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="promote-title">
+                    {t('properties.promoteMessageTitle')}
+                  </Label>
+                  <Input
+                    id="promote-title"
+                    maxLength={140}
+                    value={promoteTitle}
+                    onChange={(e) => setPromoteTitle(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="promote-body">
+                    {t('properties.promoteBody')}
+                  </Label>
+                  <Textarea
+                    id="promote-body"
+                    maxLength={500}
+                    className="min-h-24"
+                    value={promoteBody}
+                    onChange={(e) => setPromoteBody(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>{t('properties.promoteLink')}</Label>
+                  <div
+                    className="truncate rounded-md border bg-muted px-3 py-2 text-sm text-muted-foreground"
+                    dir="ltr"
+                  >
+                    {`${LISTING_LINK_BASE}/${promoteTarget.id}`}
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setPromoteTarget(null)}
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  disabled={
+                    promoteMutation.isPending ||
+                    !promoteTitle.trim() ||
+                    !promoteBody.trim()
+                  }
+                  onClick={() =>
+                    promoteMutation.mutate({
+                      id: promoteTarget.id,
+                      audience: promoteAudience,
+                      title: promoteTitle.trim(),
+                      body: promoteBody.trim(),
+                    })
+                  }
+                >
+                  {promoteMutation.isPending ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      {t('broadcast.sending')}
+                    </>
+                  ) : (
+                    <>
+                      <Send className="size-4" />
+                      {t('properties.promoteSend')}
+                    </>
+                  )}
                 </Button>
               </DialogFooter>
             </>
